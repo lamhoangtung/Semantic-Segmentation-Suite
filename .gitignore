@@ -16,3 +16,7 @@ tfrecords.py
 .idea
 **/events.out.tfevents.*
 CamVid
+*.h5
+city_scape
+.DS_Store
+*.zip
