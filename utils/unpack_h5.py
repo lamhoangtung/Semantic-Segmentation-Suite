@@ -22,7 +22,7 @@ use_list = [
     },
     {
         "include_class": ['traffic sign'],
-        "class": "traffic sign",
+        "class": "traffic_sign",
         "old": [20],
         "new": [220, 220, 0],
     },
