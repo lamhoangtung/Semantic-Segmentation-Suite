@@ -45,9 +45,9 @@ with h5py.File(filename, 'r') as f:
         os.makedirs(sub_set_dirs, exist_ok=True)
         os.makedirs(sub_set_dirs_label, exist_ok=True)
         for index, (sample, label) in tqdm(enumerate(zip(f[sub_set]['x'], f[sub_set]['y'])), desc=sub_set):
-            raw_path = os.path.join(sub_set_dirs, '{}.jpg'.format(index))
+            raw_path = os.path.join(sub_set_dirs, '{}.png'.format(index))
             label_path = os.path.join(
-                sub_set_dirs_label, '{}.jpg'.format(index))
+                sub_set_dirs_label, '{}.png'.format(index))
             sample = sample.reshape((240, 320, 3))
             sample = cv2.cvtColor(sample, cv2.COLOR_RGB2BGR)
             cv2.imwrite(raw_path, sample)
