@@ -10,7 +10,7 @@ git clone https://github.com/lamhoangtung/Semantic-Segmentation-Suite
 cd Semantic-Segmentation-Suite
 git checkout tiny_cityscape
 echo "Install dependencies"
-python3 -m pip install -r requirements.txt
+# python3 -m pip install -r requirements.txt
 echo "Download and preprecess the training data"
 gdrive download 1uprI7pIfH5BPBTNFNouYiaf_aTiMR1OF
 unzip -qq city_scape.zip
