@@ -3,9 +3,9 @@ python3 train.py --num_epochs 250 \
                   --checkpoint_step 1 \
                   --validation_step 1 \
                   --dataset city_scape \
-                  --crop_height 240 \
+                  --crop_height 224 \
                   --crop_width 320 \
-                  --batch_size 32 \
+                  --batch_size 16 \
                   --num_val_images 32 \
                   --h_flip true \
                   --v_flip true \
