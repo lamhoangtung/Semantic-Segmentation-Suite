@@ -1,4 +1,4 @@
-python 3 train.py --num_epochs 250 \
+python3 train.py --num_epochs 250 \
                   --epoch_start_i 0 \
                   --checkpoint_step 1 \
                   --validation_step 1 \
