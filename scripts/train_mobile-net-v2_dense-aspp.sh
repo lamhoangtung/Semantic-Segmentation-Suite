@@ -12,6 +12,6 @@ python3 train.py --num_epochs 500 \
                   --rotation 5 \
                   --model DenseASPP \
                   --frontend MobileNetV2 \
-                  --train_dir tiny-cityscape_mobile-net-v2_dense-aspp \
+                  --train_dir tiny-cityscape_mobile-net-v2_dense-aspp
                 #   --epoch_start_i 96 \
                 #   --continue_training true
