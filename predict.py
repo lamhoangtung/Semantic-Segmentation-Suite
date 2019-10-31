@@ -63,7 +63,6 @@ saver.restore(sess, args.checkpoint_path)
 
 for each_image in (glob.glob(os.path.join(args.image_path, '*.jpg'))):
     # print("Testing image " + args.image)
-    start_time = time.time()
 
     loaded_image = utils.load_image(each_image)
     resized_image = cv2.resize(
@@ -71,11 +70,9 @@ for each_image in (glob.glob(os.path.join(args.image_path, '*.jpg'))):
     input_image = np.expand_dims(np.float32(
         resized_image[:args.crop_height, :args.crop_width]), axis=0)/255.0
 
-    st = time.time()
+    start_time = time.time()
     output_image = sess.run(network, feed_dict={net_input: input_image})
     print("FPS: {}".format(1/(time.time()-start_time)), end='\r')
-
-    run_time = time.time()-st
 
     output_image = np.array(output_image[0, :, :, :])
     output_image = helpers.reverse_one_hot(output_image)
