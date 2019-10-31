@@ -1,8 +1,6 @@
 python3 train.py --num_epochs 500 \
-                #   --epoch_start_i 109 \
                   --checkpoint_step 1 \
                   --validation_step 1 \
-                #   --continue_training true \
                   --dataset city_scape \
                   --crop_height 224 \
                   --crop_width 320 \
@@ -15,3 +13,5 @@ python3 train.py --num_epochs 500 \
                   --model MobileUNet-Skip \
                   --frontend MobileNetV2 \
                   --train_dir train_with_background_mobile-net-v2_mobile-unet-skip
+                #   --epoch_start_i 109 \
+                #   --continue_training true \
