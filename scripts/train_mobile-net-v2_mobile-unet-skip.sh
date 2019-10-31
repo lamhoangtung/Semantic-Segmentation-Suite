@@ -14,4 +14,4 @@ python3 train.py --num_epochs 500 \
                   --rotation 5 \
                   --model MobileUNet-Skip \
                   --frontend MobileNetV2 \
-                  --train_dir train_mobile-net-v2_mobile-unet-skip
+                  --train_dir train_with_background_mobile-net-v2_mobile-unet-skip

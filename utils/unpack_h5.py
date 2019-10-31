@@ -62,9 +62,9 @@ with h5py.File(filename, 'r') as f:
             cv2.imwrite(label_path, rgb_label)
 
 
-df = pd.DataFrame({'name': [each['class'] for each in use_list],
-                   'r': [each['new'][0] for each in use_list],
-                   'g': [each['new'][1] for each in use_list],
-                   'b': [each['new'][2] for each in use_list]})
+df = pd.DataFrame({'name': [each['class'] for each in use_list].append('background'),
+                   'r': [each['new'][0] for each in use_list].append(0),
+                   'g': [each['new'][1] for each in use_list].append(0),
+                   'b': [each['new'][2] for each in use_list].append(0)})
 df.to_csv(os.path.join(output_dirs, 'class_dict.csv'), index=False)
 print('Done!')
