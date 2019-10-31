@@ -20,3 +20,6 @@ CamVid
 city_scape
 .DS_Store
 *.zip
+simulator
+weights
+result
