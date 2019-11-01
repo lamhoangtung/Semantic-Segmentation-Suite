@@ -8,16 +8,16 @@ from tqdm import tqdm
 
 filename = 'city_scape.h5'
 use_list = [
+    # {
+    #     "include_class": ["person", "rider"],
+    #     "class": "human",
+    #     "old": [24, 25],
+    #     "new": [220, 20, 60],
+    # },
     {
-        "include_class": ["person", "rider"],
-        "class": "human",
-        "old": [24, 25],
-        "new": [220, 20, 60],
-    },
-    {
-        "include_class": ['car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle', 'caravan', 'trailer'],
+        "include_class": ["person", "rider", 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle', 'caravan', 'trailer'],
         "class": "vehicle",
-        "old": [26, 27, 28, 29, 30, 31, 32, 33],
+        "old": [24, 25, 26, 27, 28, 29, 30, 31, 32, 33],
         "new": [0, 0, 142],
     },
     {
@@ -61,10 +61,15 @@ with h5py.File(filename, 'r') as f:
             rgb_label = cv2.cvtColor(rgb_label, cv2.COLOR_RGB2BGR)
             cv2.imwrite(label_path, rgb_label)
 
+class_dict = {'name': [each['class'] for each in use_list],
+     'r': [each['new'][0] for each in use_list],
+     'g': [each['new'][1] for each in use_list],
+     'b': [each['new'][2] for each in use_list]}
 
-df = pd.DataFrame({'name': [each['class'] for each in use_list].append('background'),
-                   'r': [each['new'][0] for each in use_list].append(0),
-                   'g': [each['new'][1] for each in use_list].append(0),
-                   'b': [each['new'][2] for each in use_list].append(0)})
+class_dict['name'].append('background')
+for c in ['r', 'g', 'b']:
+    class_dict[c].append(0)
+
+df = pd.DataFrame(class_dict)
 df.to_csv(os.path.join(output_dirs, 'class_dict.csv'), index=False)
 print('Done!')
