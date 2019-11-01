@@ -4,7 +4,7 @@ python3 train.py --num_epochs 600 \
                   --dataset city_scape \
                   --crop_height 224 \
                   --crop_width 320 \
-                  --batch_size 64 \
+                  --batch_size 16 \
                   --num_val_images 32 \
                   --h_flip true \
                   --v_flip true \
@@ -12,6 +12,6 @@ python3 train.py --num_epochs 600 \
                   --rotation 5 \
                   --model DenseASPP \
                   --frontend MobileNetV2 \
-                  --train_dir tiny-cityscape_mobile-net-v2_dense-aspp \
-                  --epoch_start_i 322 \
-                  --continue_training true
+                  --train_dir tiny-cityscape_mobile-net-v2_dense-aspp
+                #   --epoch_start_i 322 \
+                #   --continue_training true

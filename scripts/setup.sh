@@ -12,7 +12,7 @@ git checkout tiny_cityscape
 echo "Install dependencies"
 # python3 -m pip install -r requirements.txt
 echo "Download and preprecess the training data"
-gdrive download 1BWT7vAhhJcboF6csDmIX8suejqD1MIks
+gdrive download 1iIriudxoYT4O-TOqjpAMbDWYeJvMgKjv
 unzip -qq city_scape.zip
 chmod 777 ./scripts/*.sh
 # For logging
