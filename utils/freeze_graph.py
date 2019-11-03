@@ -8,7 +8,8 @@ from tensorflow.contrib.rnn import *
 
 dir = os.path.dirname(os.path.realpath(__file__))
 
-def freeze_graph(model_dir, output_node_names):
+
+def freeze_graph(model_dir, output_node_names, precision_mode='FP32'):
     """Extract the sub graph defined by the output nodes and convert 
     all its variables into constant 
     Args:
@@ -54,7 +55,23 @@ def freeze_graph(model_dir, output_node_names):
         # Finally we serialize and dump the output graph to the filesystem
         with tf.gfile.GFile(output_graph, "wb") as f:
             f.write(output_graph_def.SerializeToString())
-        print("%d ops in the final graph." % len(output_graph_def.node))
+        print("%d ops in the frozen graph." % len(output_graph_def.node))
+
+        trt_graph = tf.contrib.tensorrt.create_inference_graph(
+            input_graph_def=output_graph_def,
+            outputs=output_node_names.split(","),
+            max_batch_size=1,
+            max_workspace_size_bytes=2500000000,
+            precision_mode=precision_mode)
+
+        with tf.gfile.FastGFile(absolute_model_dir + "/tensor_rt.pb", 'wb') as f:
+            f.write(trt_graph.SerializeToString())
+
+        trt_engine_nodes = len(
+            [1 for n in trt_graph.node if str(n.op) == 'TRTEngineOp'])
+        print("{} trt_engine_nodes in TensorRT graph".format(trt_engine_nodes))
+        all_nodes = len([1 for n in trt_graph.node])
+        print("{} nodes in TensorRT graph".format(all_nodes))
 
     return output_graph_def
 
@@ -63,6 +80,7 @@ if __name__ == '__main__':
     parser.add_argument("--model_dir", type=str, default="./weights", help="Model folder to export")
     parser.add_argument("--output_node_names", type=str, default="softmax_output",
                         help="The name of the output nodes, comma separated.")
+    parser.add_argument("--precision_mode", type=str, default="FP32", required=False, help="Percision model for TensorRT optimization")
     args = parser.parse_args()
 
-    freeze_graph(args.model_dir, args.output_node_names)
+    freeze_graph(args.model_dir, args.output_node_names, args.precision_mode)
