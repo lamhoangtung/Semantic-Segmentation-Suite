@@ -2,6 +2,7 @@ import os, argparse
 
 import tensorflow as tf
 from tensorflow.contrib.rnn import *
+from tensorflow.python.compiler.tensorrt import trt_convert as trt
 
 # The original freeze_graph function
 # from tensorflow.python.tools.freeze_graph import freeze_graph 
@@ -57,7 +58,7 @@ def freeze_graph(model_dir, output_node_names, precision_mode='FP32'):
             f.write(output_graph_def.SerializeToString())
         print("%d ops in the frozen graph." % len(output_graph_def.node))
 
-        trt_graph = tf.contrib.tensorrt.create_inference_graph(
+        trt_graph = trt.create_inference_graph(
             input_graph_def=output_graph_def,
             outputs=output_node_names.split(","),
             max_batch_size=1,
