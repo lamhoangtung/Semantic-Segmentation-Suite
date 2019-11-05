@@ -65,7 +65,7 @@ def freeze_graph(model_dir, output_node_names, precision_mode='FP32'):
             max_workspace_size_bytes=2500000000,
             precision_mode=precision_mode)
 
-        with tf.gfile.FastGFile(absolute_model_dir + "/tensor_rt.pb", 'wb') as f:
+        with tf.gfile.GFile(absolute_model_dir + "/tensor_rt.pb", 'wb') as f:
             f.write(trt_graph.SerializeToString())
 
         trt_engine_nodes = len(
