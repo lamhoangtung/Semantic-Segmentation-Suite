@@ -16,7 +16,7 @@ def self_balanced_focal_loss(y_true, y_pred, alpha=3, gamma=2.0):
 
     # cross entropy loss
     y_pred = tf.nn.softmax(y_pred, -1)
-    cross_entropy = tf.losses.categorical_crossentropy(y_true, y_pred)
+    cross_entropy = tf.compat.v2.losses.categorical_crossentropy(y_true, y_pred)
 
     # sample weights
     sample_weights = tf.math.reduce_max(tf.math.pow(
