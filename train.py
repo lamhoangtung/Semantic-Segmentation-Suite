@@ -123,7 +123,7 @@ new_network = tf.nn.softmax(network, name="softmax_output") # For easier graph f
 if args.lr_warmup and args.num_epochs - 5 <= 0:
     raise ValueError('num_epochs must be larger than 5 if lr warm up is used.')
 
-steps_per_epoch = np.ceil(len(train_input_names) / args.batch_size)
+steps_per_epoch = len(train_input_names) // args.batch_size
 if args.lr_scheduler is not None:
     lr_decays = {'step_decay': step_decay(args.learning_rate, args.num_epochs - 5 if args.lr_warmup else args.num_epochs,
                                         warmup=args.lr_warmup),
