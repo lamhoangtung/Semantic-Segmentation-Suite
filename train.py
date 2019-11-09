@@ -8,6 +8,7 @@ import argparse
 import random
 import os, sys
 import subprocess
+from utils.learning_rate import *
 
 # use 'Agg' on matplotlib so that plots could be generated even without Xserver
 # running
@@ -35,6 +36,14 @@ parser.add_argument('--validation_step', type=int, default=1, help='How often to
 parser.add_argument('--image', type=str, default=None, help='The image you want to predict on. Only valid in "predict" mode.')
 parser.add_argument('--continue_training', type=str2bool, default=False, help='Whether to continue training from a checkpoint')
 parser.add_argument('--dataset', type=str, default="CamVid", help='Dataset you are using.')
+parser.add_argument('--loss', help='The loss function for traing.', type=str, default='ce',
+                    choices=['ce', 'self_balanced_focal_loss'])
+parser.add_argument('--lr_scheduler', help='The strategy to schedule learning rate.', type=str, default=None,
+                    choices=['step_decay', 'poly_decay', 'cosine_decay'])
+parser.add_argument('--lr_warmup', help='Whether to use lr warm up.', type=bool, default=False)
+parser.add_argument('--learning_rate', help='The initial learning rate.', type=float, default=3e-4)
+parser.add_argument('--optimizer', help='The optimizer for training.', type=str, default='rmsprop',
+                    choices=['rmsprop', 'adam'])
 parser.add_argument('--crop_height', type=int, default=512, help='Height of cropped input image to network')
 parser.add_argument('--crop_width', type=int, default=512, help='Width of cropped input image to network')
 parser.add_argument('--batch_size', type=int, default=1, help='Number of images in each batch')
@@ -84,6 +93,11 @@ for class_name in class_names_list:
 
 num_classes = len(label_values)
 
+# Load the data
+print("Loading the data ...")
+train_input_names, train_output_names, val_input_names, val_output_names, test_input_names, test_output_names = utils.prepare_data(
+    dataset_dir=args.dataset)
+
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 sess=tf.Session(config=config)
@@ -95,11 +109,45 @@ net_output = tf.placeholder(tf.float32,shape=[None,None,None,num_classes])
 
 network, init_fn = model_builder.build_model(model_name=args.model, frontend=args.frontend, net_input=net_input, num_classes=num_classes, crop_width=args.crop_width, crop_height=args.crop_height, is_training=True)
 
-loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=network, labels=net_output))
+if args.loss == 'ce':
+    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=network, labels=net_output))
+elif args.loss == 'self_balanced_focal_loss':
+    from utils.losses import self_balanced_focal_loss
+    loss = self_balanced_focal_loss(network, net_output)
+else:
+    raise ValueError('Loss function {} are not supported'.format(args.loss))
+
 new_network = tf.nn.softmax(network, name="softmax_output") # For easier graph freezee
 
+# lr schedule strategy
+if args.lr_warmup and args.num_epochs - 5 <= 0:
+    raise ValueError('num_epochs must be larger than 5 if lr warm up is used.')
+
+steps_per_epoch = np.ceil(len(train_input_names) / args.batch_size)
+if args.lr_decays is not None:
+    lr_decays = {'step_decay': step_decay(args.learning_rate, args.num_epochs - 5 if args.lr_warmup else args.num_epochs,
+                                        warmup=args.lr_warmup),
+                'poly_decay': poly_decay(args.learning_rate, args.num_epochs - 5 if args.lr_warmup else args.num_epochs,
+                                        warmup=args.lr_warmup),
+                'cosine_decay': cosine_decay(args.num_epochs - 5 if args.lr_warmup else args.num_epochs,
+                                            args.learning_rate, warmup=args.lr_warmup)}
+    lr_decay = lr_decays[args.lr_scheduler]
+    learning_rate = tf.Variable(args.learning_rate, trainable=False)
+    learning_rate_scheduler = LearningRateScheduler(lr_decay, sess, learning_rate, args.learning_rate, args.lr_warmup, steps_per_epoch,
+                                                    verbose=1)
+else:
+    learning_rate = args.learning_rate
+    learning_rate_scheduler = None
+
+
 global_step = tf.Variable(0, name='global_step', trainable=False)
-opt = tf.train.RMSPropOptimizer(learning_rate=0.0001, decay=0.995).minimize(loss, global_step=global_step, var_list=[var for var in tf.trainable_variables()])
+if args.optimizer == 'rmsprop':
+    opt = tf.train.RMSPropOptimizer(learning_rate=0.0001, decay=0.995).minimize(loss, global_step=global_step, var_list=[var for var in tf.trainable_variables()])
+elif args.optimizer == 'adam':
+    opt = tf.train.AdamOptimizer(learning_rate=learning_rate, epsilon=1e-7).minimize(
+        loss, global_step=global_step, var_list=[var for var in tf.trainable_variables()])
+else:
+    raise ValueError('Optimizer {} are not supported'.format(args.loss))
 
 saver=tf.train.Saver(max_to_keep=1000)
 sess.run(tf.global_variables_initializer())
@@ -116,12 +164,6 @@ model_checkpoint_name = args.train_dir + "/checkpoints/latest_model_" + args.mod
 if args.continue_training:
     print('Loaded latest model checkpoint')
     saver.restore(sess, model_checkpoint_name)
-
-# Load the data
-print("Loading the data ...")
-train_input_names,train_output_names, val_input_names, val_output_names, test_input_names, test_output_names = utils.prepare_data(dataset_dir=args.dataset)
-
-
 
 print("\n***** Begin training *****")
 print("Dataset -->", args.dataset)
@@ -165,7 +207,8 @@ class ScalarSummary:
         self.tensor = placeholder
 
 summary_train_loss = ScalarSummary(tf.placeholder(tf.float32, name='epoch_train_loss'))
-train_summaries = tf.summary.merge([summary_train_loss.summary])
+summary_lr = ScalarSummary(learning_rate, name='learning_rate')
+train_summaries = tf.summary.merge([summary_train_loss.summary, summary_lr.summary])
 
 summary_class_accuracies = []
 with tf.name_scope('epoch_per_class_metrics'):
@@ -211,6 +254,10 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
     num_iters = int(np.floor(len(id_list) / args.batch_size))
     st = time.time()
     epoch_st=time.time()
+
+    if learning_rate_scheduler is not None:
+        learning_rate_scheduler.on_epoch_begin(epoch)
+
     for i in range(num_iters):
         # st=time.time()
 
@@ -218,6 +265,9 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
         output_image_batch = []
 
         # Collect a batch of images
+        if learning_rate_scheduler is not None:
+            learning_rate_scheduler.on_train_batch_begin()
+
         for j in range(args.batch_size):
             index = i*args.batch_size + j
             id = id_list[index]
@@ -254,8 +304,16 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
     mean_loss = np.mean(current_losses)
     avg_loss_per_epoch.append(mean_loss)
 
+    if learning_rate_scheduler is not None:
+        lr = learning_rate_scheduler.get_lr_value()
+    else:
+        try:
+            lr = sess.run(opt._lr)
+        except:
+            lr = sess.run(opt._learning_rate)
+
     summary = sess.run(train_summaries, feed_dict={
-        summary_train_loss.tensor: mean_loss
+        summary_train_loss.tensor: mean_loss, summary_lr.tensor: lr
     })
     train_writer.add_summary(summary, epoch)
 
