@@ -4,7 +4,7 @@ python3 train.py --num_epochs 600 \
                   --dataset apolo_city_scape \
                   --crop_height 224 \
                   --crop_width 320 \
-                  --batch_size 64 \
+                  --batch_size 32 \
                   --num_val_images 64 \
                   --h_flip true \
                   --v_flip true \
@@ -12,6 +12,10 @@ python3 train.py --num_epochs 600 \
                   --rotation 5 \
                   --model DenseASPP \
                   --frontend MobileNetV2 \
+                  --loss self_balanced_focal_loss \
+                  --lr_scheduler poly_decay \
+                  --lr_warmup true \
+                  --optimizer adam \
                   --train_dir apolo-cityscape_mobile-net-v2_dense-aspp
                 #   --epoch_start_i 322 \
                 #   --continue_training true
