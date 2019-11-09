@@ -134,7 +134,7 @@ if args.lr_scheduler is not None:
     lr_decay = lr_decays[args.lr_scheduler]
     learning_rate = tf.Variable(args.learning_rate, trainable=False)
     learning_rate_scheduler = LearningRateScheduler(lr_decay, sess, learning_rate, args.learning_rate, args.lr_warmup, steps_per_epoch,
-                                                    verbose=1)
+                                                    start_epoch=args.epoch_start_i, verbose=1)
 else:
     learning_rate = args.learning_rate
     learning_rate_scheduler = None

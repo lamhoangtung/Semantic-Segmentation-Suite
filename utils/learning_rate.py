@@ -63,6 +63,7 @@ class LearningRateScheduler():
                  learning_rate=None,
                  warmup=False,
                  steps_per_epoch=None,
+                 start_epoch=0,
                  verbose=0):
         super(LearningRateScheduler, self).__init__()
         self.learning_rate = learning_rate
@@ -71,7 +72,7 @@ class LearningRateScheduler():
         self.warmup_epochs = 5 if warmup else 0
         self.warmup_steps = int(steps_per_epoch) * \
             self.warmup_epochs if warmup else 0
-        self.global_batch = 0
+        self.global_batch = 0 if start_epoch == 0 else steps_per_epoch*start_epoch
         self.sess = sess
         self.learning_rate_variable = learning_rate_variable
 
