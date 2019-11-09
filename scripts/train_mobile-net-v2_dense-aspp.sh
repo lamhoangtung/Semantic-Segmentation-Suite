@@ -16,6 +16,6 @@ python3 train.py --num_epochs 600 \
                   --lr_scheduler poly_decay \
                   --lr_warmup true \
                   --optimizer adam \
-                  --train_dir apolo-cityscape_mobile-net-v2_dense-aspp
+                  --train_dir apolo-cityscape_mobile-net-v2_dense-aspp_self-bl-focal_warmup-lr_exp-decay_adam
                 #   --epoch_start_i 322 \
                 #   --continue_training true
