@@ -15,8 +15,4 @@ echo "Download and preprecess the training data"
 gdrive download 1UB81Wx44nYOBLzQckwrKAu3wkgnisqW9
 unzip -qq apolo_city_scape.zip
 chmod 777 ./scripts/*.sh
-# For logging
-apt-get -y install expect
-# conda install -c eumetsat expect
-# trains-init
 echo "Done. Run ./scripts/train_mobile-net-v2_mobile-unet-skip.sh to start training!"
