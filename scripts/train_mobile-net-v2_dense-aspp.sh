@@ -1,4 +1,4 @@
-python3 train.py --num_epochs 600 \
+python3 train.py --num_epochs 100 \
                   --checkpoint_step 1 \
                   --validation_step 1 \
                   --dataset apolo_city_scape \
