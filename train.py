@@ -209,7 +209,7 @@ class ScalarSummary:
 summary_train_loss = ScalarSummary(tf.placeholder(tf.float32, name='epoch_train_loss'))
 summary_lr = ScalarSummary(tf.placeholder(tf.float32, name='learning_rate'))
 train_summaries = tf.summary.merge([summary_train_loss.summary])
-lr_summaries = tf.summary.merge([summary_lr])
+lr_summaries = tf.summary.merge([summary_lr.summary])
 
 summary_class_accuracies = []
 with tf.name_scope('epoch_per_class_metrics'):
