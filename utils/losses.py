@@ -1,5 +1,8 @@
 import tensorflow as tf
 
+backend = tf.keras.backend
+
+
 def self_balanced_focal_loss(y_true, y_pred, alpha=3, gamma=2.0):
     """
     Original by Yang Lu:
@@ -14,20 +17,19 @@ def self_balanced_focal_loss(y_true, y_pred, alpha=3, gamma=2.0):
     :return:
     """
 
-    # cross entropy loss
-    y_pred = tf.nn.softmax(y_pred, -1)
-    cross_entropy = tf.compat.v2.losses.categorical_crossentropy(y_true, y_pred)
+    y_pred = backend.softmax(y_pred, -1)
+    cross_entropy = backend.categorical_crossentropy(y_true, y_pred)
 
     # sample weights
-    sample_weights = tf.math.reduce_max(tf.math.pow(
+    sample_weights = backend.max(backend.pow(
         1.0 - y_pred, gamma) * y_true, axis=-1)
 
-    # class weights 
-    pixel_rate = tf.reduce_sum(y_true, axis=[1, 2], keepdims=True) / tf.reduce_sum(tf.ones_like(y_true),
-                                                                                axis=[1, 2], keepdims=True)
-    class_weights = tf.math.reduce_max(tf.math.pow(tf.ones_like(
+    # class weights
+    pixel_rate = backend.sum(y_true, axis=[1, 2], keepdims=True) / backend.sum(backend.ones_like(y_true),
+                                                                               axis=[1, 2], keepdims=True)
+    class_weights = backend.max(backend.pow(backend.ones_like(
         y_true) * alpha, pixel_rate) * y_true, axis=-1)
 
     # final loss
     final_loss = class_weights * sample_weights * cross_entropy
-    return tf.math.reduce_mean(tf.reduce_sum(final_loss, axis=[1, 2]))
+    return backend.mean(backend.sum(final_loss, axis=[1, 2]))
