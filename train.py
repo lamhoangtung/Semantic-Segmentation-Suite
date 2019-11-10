@@ -208,7 +208,8 @@ class ScalarSummary:
 
 summary_train_loss = ScalarSummary(tf.placeholder(tf.float32, name='epoch_train_loss'))
 summary_lr = ScalarSummary(tf.placeholder(tf.float32, name='learning_rate'))
-train_summaries = tf.summary.merge([summary_train_loss.summary, summary_lr.summary])
+train_summaries = tf.summary.merge([summary_train_loss.summary])
+lr_summaries = tf.summary.merge([summary_lr])
 
 summary_class_accuracies = []
 with tf.name_scope('epoch_per_class_metrics'):
@@ -264,10 +265,22 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
         input_image_batch = []
         output_image_batch = []
 
-        # Collect a batch of images
         if learning_rate_scheduler is not None:
             learning_rate_scheduler.on_train_batch_begin()
+            lr = learning_rate_scheduler.get_lr_value()
+        else:
+            try:
+                lr = sess.run(opt._lr)
+            except:
+                lr = sess.run(opt._learning_rate)
 
+        # track lr of each epoch on tensorbard
+        summary = sess.run(lr_summaries, feed_dict={
+            summary_lr.tensor: lr
+        })
+        train_writer.add_summary(summary, epoch*steps_per_epoch+i)
+
+        # Collect a batch of images
         for j in range(args.batch_size):
             index = i*args.batch_size + j
             id = id_list[index]
@@ -304,17 +317,8 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
     mean_loss = np.mean(current_losses)
     avg_loss_per_epoch.append(mean_loss)
 
-    if learning_rate_scheduler is not None:
-        lr = learning_rate_scheduler.get_lr_value()
-    else:
-        try:
-            lr = sess.run(opt._lr)
-        except:
-            lr = sess.run(opt._learning_rate)
-
     summary = sess.run(train_summaries, feed_dict={
-        summary_train_loss.tensor: mean_loss, summary_lr.tensor: lr
-    })
+        summary_train_loss.tensor: mean_loss})
     train_writer.add_summary(summary, epoch)
 
     # Create directories if needed
