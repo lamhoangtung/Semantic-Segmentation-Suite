@@ -113,7 +113,7 @@ if args.loss == 'ce':
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=network, labels=net_output))
 elif args.loss == 'self_balanced_focal_loss':
     from utils.losses import self_balanced_focal_loss
-    loss = self_balanced_focal_loss(network, net_output)
+    loss = self_balanced_focal_loss(net_output, network)
 else:
     raise ValueError('Loss function {} are not supported'.format(args.loss))
 
@@ -133,8 +133,9 @@ if args.lr_scheduler is not None:
                                             args.learning_rate, warmup=args.lr_warmup)}
     lr_decay = lr_decays[args.lr_scheduler]
     learning_rate = tf.Variable(args.learning_rate, trainable=False)
+    sess.run(learning_rate.initializer)
     learning_rate_scheduler = LearningRateScheduler(lr_decay, sess, learning_rate, args.learning_rate, args.lr_warmup, steps_per_epoch,
-                                                    start_epoch=args.epoch_start_i, verbose=1)
+                                                    start_epoch=args.epoch_start_i, verbose=0)
 else:
     learning_rate = args.learning_rate
     learning_rate_scheduler = None
@@ -142,13 +143,13 @@ else:
 
 global_step = tf.Variable(0, name='global_step', trainable=False)
 if args.optimizer == 'rmsprop':
-    opt = tf.train.RMSPropOptimizer(learning_rate=0.0001, decay=0.995).minimize(loss, global_step=global_step, var_list=[var for var in tf.trainable_variables()])
+    optimizer = tf.train.RMSPropOptimizer(learning_rate=0.0001, decay=0.995)
 elif args.optimizer == 'adam':
-    opt = tf.train.AdamOptimizer(learning_rate=learning_rate, epsilon=1e-7).minimize(
-        loss, global_step=global_step, var_list=[var for var in tf.trainable_variables()])
+    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)#  epsilon=1e-7
 else:
     raise ValueError('Optimizer {} are not supported'.format(args.loss))
 
+opt = optimizer.minimize(loss, global_step=global_step, var_list=[var for var in tf.trainable_variables()])
 saver=tf.train.Saver(max_to_keep=1000)
 sess.run(tf.global_variables_initializer())
 
@@ -242,6 +243,8 @@ validation_summaries = tf.summary.merge([s.summary for s in summaries])
 
 train_writer = tf.summary.FileWriter(args.train_dir + '/train', sess.graph)
 
+print('Init LR is: ', sess.run(optimizer._lr))
+print('Total {} train samples'.format(len(train_input_names)))
 # Do the training here
 for epoch in range(args.epoch_start_i, args.num_epochs):
 
@@ -270,10 +273,9 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
             lr = learning_rate_scheduler.get_lr_value()
         else:
             try:
-                lr = sess.run(opt._lr)
+                lr = sess.run(optimizer._lr)
             except:
-                lr = sess.run(opt._learning_rate)
-
+                lr = sess.run(optimizer._learning_rate)
         # track lr of each epoch on tensorbard
         summary = sess.run(lr_summaries, feed_dict={
             summary_lr.tensor: lr

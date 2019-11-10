@@ -65,7 +65,6 @@ class LearningRateScheduler():
                  steps_per_epoch=None,
                  start_epoch=0,
                  verbose=0):
-        super(LearningRateScheduler, self).__init__()
         self.learning_rate = learning_rate
         self.schedule = schedule
         self.verbose = verbose
