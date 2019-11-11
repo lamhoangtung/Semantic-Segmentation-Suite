@@ -25,7 +25,10 @@ def build_dense_aspp(inputs, num_classes, preset_model='DenseASPP', frontend="Re
 
     logits, end_points, frontend_scope, init_fn  = frontend_builder.build_frontend(inputs, frontend, pretrained_dir=pretrained_dir, is_training=is_training)
 
-    init_features = end_points['pool3']
+    if frontend == 'MixNet_S':
+        init_features = end_points['reduction_3']
+    else:
+        init_features = end_points['pool3']
 
     ### First block, rate = 3
     d_3_features = DilatedConvBlock(init_features, n_filters=256, kernel_size=[1, 1])

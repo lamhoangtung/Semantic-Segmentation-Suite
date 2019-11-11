@@ -22,7 +22,7 @@ SUPPORTED_MODELS = ["FC-DenseNet56", "FC-DenseNet67", "FC-DenseNet103", "Encoder
     "FRRN-A", "FRRN-B", "MobileUNet", "MobileUNet-Skip", "PSPNet", "GCN", "DeepLabV3", "DeepLabV3_plus", "AdapNet", 
     "DenseASPP", "DDSC", "BiSeNet", "custom"]
 
-SUPPORTED_FRONTENDS = ["ResNet50", "ResNet101", "ResNet152", "MobileNetV2", "InceptionV4"]
+SUPPORTED_FRONTENDS = ["ResNet50", "ResNet101", "ResNet152", "MobileNetV2", "InceptionV4", "MixNet_S"]
 
 def download_checkpoints(model_name):
     subprocess.check_output(["python", "utils/get_pretrained_checkpoints.py", "--model=" + model_name])

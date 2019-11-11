@@ -3,6 +3,7 @@ from tensorflow.contrib import slim
 from frontends import resnet_v2
 from frontends import mobilenet_v2
 from frontends import inception_v4
+from frontends import mixnet_builder
 import os 
 
 
@@ -32,7 +33,11 @@ def build_frontend(inputs, frontend, is_training=True, pretrained_dir="models"):
             logits, end_points = inception_v4.inception_v4(inputs, is_training=is_training, scope='inception_v4')
             frontend_scope='inception_v4'
             init_fn = slim.assign_from_checkpoint_fn(model_path=os.path.join(pretrained_dir, 'inception_v4.ckpt'), var_list=slim.get_model_variables('inception_v4'), ignore_missing_vars=True)
+    elif frontend == 'MixNet_S':
+        logits, end_points = mixnet_builder.build_model_base(inputs, 'mixnet-s', training=is_training)
+        frontend_scope = 'mixnet-s'
+        init_fn = None
     else:
-        raise ValueError("Unsupported fronetnd model '%s'. This function only supports ResNet50, ResNet101, ResNet152, and MobileNetV2" % (frontend))
+        raise ValueError("Unsupported fronetnd model '%s'. This function only supports ResNet50, ResNet101, ResNet152, MobileNetV2 and MixNet_S" % (frontend))
 
-    return logits, end_points, frontend_scope, init_fn 
+    return logits, end_points, frontend_scope, init_fn
