@@ -33,6 +33,8 @@
 add_default_attributes
 strip_unused_nodes(type=float, shape="1,299,299,3")
 remove_nodes(op=Identity, op=CheckNumerics)
+merge_duplicate_nodes
+remove_control_dependencies
 fold_constants(ignore_errors=true)
 fold_batch_norms
 fold_old_batch_norms
