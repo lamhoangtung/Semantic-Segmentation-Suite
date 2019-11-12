@@ -1,4 +1,4 @@
-python3 train.py --num_epochs 100 \
+python3 train.py --num_epochs 200 \
                   --checkpoint_step 1 \
                   --validation_step 1 \
                   --dataset apolo_city_scape \
@@ -13,9 +13,10 @@ python3 train.py --num_epochs 100 \
                   --model DenseASPP \
                   --frontend MobileNetV2 \
                   --loss self_balanced_focal_loss \
-                  --lr_scheduler poly_decay \
-                  --lr_warmup true \
+                  --lr_warmup false \
+                  --learning_rate 0.001 \
                   --optimizer adam \
-                  --train_dir apolo-cityscape_mobile-net-v2_dense-aspp_self-bl-focal_warmup-lr_exp-decay_adam
+                  --train_dir apolo-cityscape_mobile-net-v2_dense-aspp_self-bl-focal_adam
+                  # --lr_scheduler poly_decay \
                 #   --epoch_start_i 322 \
                 #   --continue_training true
