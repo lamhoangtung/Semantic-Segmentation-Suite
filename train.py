@@ -127,6 +127,7 @@ learning_rate = tf.Variable(args.learning_rate, trainable=False)
 sess.run(learning_rate.initializer)
 
 steps_per_epoch = len(train_input_names) // args.batch_size
+learning_rate_scheduler = None
 
 if args.lr_scheduler is not None:
     lr_decays = {'step_decay': step_decay(args.learning_rate, args.num_epochs - 5 if args.lr_warmup else args.num_epochs,
