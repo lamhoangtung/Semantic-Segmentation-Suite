@@ -123,7 +123,11 @@ new_network = tf.nn.softmax(network, name="softmax_output") # For easier graph f
 if args.lr_warmup and args.num_epochs - 5 <= 0:
     raise ValueError('num_epochs must be larger than 5 if lr warm up is used.')
 
+learning_rate = tf.Variable(args.learning_rate, trainable=False)
+sess.run(learning_rate.initializer)
+
 steps_per_epoch = len(train_input_names) // args.batch_size
+
 if args.lr_scheduler is not None:
     lr_decays = {'step_decay': step_decay(args.learning_rate, args.num_epochs - 5 if args.lr_warmup else args.num_epochs,
                                         warmup=args.lr_warmup),
@@ -132,14 +136,8 @@ if args.lr_scheduler is not None:
                 'cosine_decay': cosine_decay(args.num_epochs - 5 if args.lr_warmup else args.num_epochs,
                                             args.learning_rate, warmup=args.lr_warmup)}
     lr_decay = lr_decays[args.lr_scheduler]
-    learning_rate = tf.Variable(args.learning_rate, trainable=False)
-    sess.run(learning_rate.initializer)
     learning_rate_scheduler = LearningRateScheduler(lr_decay, sess, learning_rate, args.learning_rate, args.lr_warmup, steps_per_epoch,
                                                     start_epoch=args.epoch_start_i, verbose=0)
-else:
-    learning_rate = args.learning_rate
-    learning_rate_scheduler = None
-
 
 global_step = tf.Variable(0, name='global_step', trainable=False)
 if args.optimizer == 'rmsprop':
