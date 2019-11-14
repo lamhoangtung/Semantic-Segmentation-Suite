@@ -142,7 +142,9 @@ if args.lr_scheduler is not None:
 
 global_step = tf.Variable(0, name='global_step', trainable=False)
 if args.optimizer == 'rmsprop':
-    optimizer = tf.train.RMSPropOptimizer(learning_rate=0.0001, decay=0.995)
+    learning_rate = tf.Variable(0.0001, trainable=False)
+    sess.run(learning_rate.initializer) 
+    optimizer = tf.train.RMSPropOptimizer(learning_rate=learning_rate, decay=0.995)
 elif args.optimizer == 'adam':
     optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)#  epsilon=1e-7
 else:
