@@ -242,7 +242,6 @@ validation_summaries = tf.summary.merge([s.summary for s in summaries])
 
 train_writer = tf.summary.FileWriter(args.train_dir + '/train', sess.graph)
 
-print('Init LR is: ', sess.run(optimizer._lr))
 print('Total {} train samples'.format(len(train_input_names)))
 # Do the training here
 for epoch in range(args.epoch_start_i, args.num_epochs):
