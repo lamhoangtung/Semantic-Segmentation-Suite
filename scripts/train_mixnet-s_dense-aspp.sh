@@ -1,4 +1,4 @@
-python3 train.py --num_epochs 500 \
+python3 train.py --num_epochs 200 \
                   --checkpoint_step 1 \
                   --validation_step 1 \
                   --dataset apolo_city_scape \
@@ -14,9 +14,8 @@ python3 train.py --num_epochs 500 \
                   --frontend MixNet_S \
                   --loss self_balanced_focal_loss \
                   --lr_warmup false \
-                  --learning_rate 0.001 \
-                  --optimizer adam \
-                  --train_dir apolo-cityscape_mixnet-s_dense-aspp_self-bl-focal_adam
+                  --optimizer rmsprop \
+                  --train_dir /tmp/apolo-cityscape_mixnet-s_dense-aspp_self-bl-focal_adam
                   # --lr_scheduler poly_decay \
                 #   --epoch_start_i 322 \
                 #   --continue_training true
