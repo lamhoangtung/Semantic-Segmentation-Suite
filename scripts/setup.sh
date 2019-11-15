@@ -13,6 +13,6 @@ echo "Install dependencies"
 # python3 -m pip install -r requirements.txt
 echo "Download and preprecess the training data"
 gdrive download 1UB81Wx44nYOBLzQckwrKAu3wkgnisqW9
-unzip -qq apolo_city_scape.zip
+unzip -qq apolo_city_scape_no_vehicle.zip
 chmod 777 ./scripts/*.sh
 echo "Done. Run ./scripts/train_mobile-net-v2_mobile-unet-skip.sh to start training!"
